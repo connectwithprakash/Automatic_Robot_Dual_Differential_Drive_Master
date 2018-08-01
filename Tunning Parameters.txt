@@ -8,4 +8,5 @@
 4. Hold Positioon Dual Differential Linetrackers Tune
 	(P,I,D) => (1.8,0.02,6)
 5. Move Y Slow
-	(P,I,D) => (1.0,0.02,6)
+	(P,I,D) => (0.6,0.02,10)
+
