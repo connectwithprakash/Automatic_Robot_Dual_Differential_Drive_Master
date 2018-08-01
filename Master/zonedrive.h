@@ -78,9 +78,9 @@ struct coordinates{
 	int y;
 	};
 
-const struct coordinates Throwingzone1 = {4600,1900};	//4700 -x 1900 -y
-const struct coordinates Throwingzone2 = {6800,1900}; 
-const struct coordinates Throwingzone3 = {6500,5200};
+const struct coordinates Throwingzone1 = {4600,1950};	//4700 -x 1900 -y
+const struct coordinates Throwingzone2 = {6800,1950}; 
+const struct coordinates Throwingzone3 = {6500,5350};
 
 /////////////////////////////////////////
 /*these are state and position of robot in start zone*/
@@ -142,6 +142,14 @@ char receiveAck;
 
 void gorockthegamefield(void)
 {
+	
+	//light up led's//
+	if((RACK_STATUSPORT & (1<<RACK_STATUSPIN))){
+		PORTK |= (1<<PK1);
+	}
+	else{
+		PORTK &= ~(1<<PK1);
+	}
 	
 	if((where == inLZ1 || where == inLZ2) && robotState == notmoving){
 		/*if the robot is in loading zone 1 after completing task3 and task4 
@@ -215,13 +223,14 @@ void gorockthegamefield(void)
 		robotState = moving;
 		//uart0_puts("going ahead \t");
 		if(abs(encoderX.getdistance()) >= 4400){
+			encoderY.resetCount();
 			linetrackerXjunctionWatch();
 			//uart0_puts("int on");
 		}
 		//uart0_puts("\r\n");
 	}
 	else if((directlyLZ2 || directlyTZ3 || LZ2ForTZ3 || alwaysTZ2) && !task1){
-		movx((Throwingzone2.x),Front,STARTZONEtoCORNER);
+		movx((Throwingzone2.x-100),Front,STARTZONEtoCORNER);
 		robotState = moving;
 		if(abs(encoderX.getdistance()) >= 6600){
 			//uart0_puts("interrupt on\t");
@@ -237,8 +246,8 @@ void gorockthegamefield(void)
 		robotState = moving;
 		linetrackerXjunctionWatchOff();
 		linetrackerYjunctionWatch();
-		movYForwardSlow(CORNERtoLZ1);
-		//MovY_Slow(1000, Front, CORNERtoLZ1);
+		//movYForwardSlow(CORNERtoLZ1);
+		Move_Yaxis_Slow(1000, Front, CORNERtoLZ1);
 		//movYForwardSlow(CORNERtoLZ1);
 	}
 	/*if task2 is completed and robot just reached loading zone 1*/
@@ -457,7 +466,7 @@ void gorockthegamefield(void)
 					//}
 				//}
 				//else{
-					Move_Yaxis(Throwingzone2.y+50, Back, LZ2toTZ2);
+					Move_Yaxis(Throwingzone2.y-25, Back, LZ2toTZ2);
 					//movy(Throwingzone2.y,Back,TZ2toLZ2);
 					robotState = moving;
 			
@@ -492,7 +501,7 @@ void gorockthegamefield(void)
 				compass.setPid(2.0,0,30);//2.0
 				uart0_puts("going tz3 \t");
 				compass.SETPOINT = 181;
-				Move_Yaxis(Throwingzone3.y-50, Front, LZ2toTZ3);
+				Move_Yaxis(Throwingzone3.y-25, Front, LZ2toTZ3);
 				//movy(5300,Front,LZ2toTZ3);
 				robotState = moving;
 				if(abs(encoderY.getdistance()) >= 4000){

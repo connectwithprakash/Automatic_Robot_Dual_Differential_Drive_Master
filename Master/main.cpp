@@ -41,21 +41,30 @@ int main(void)
 	SET(LEFT_LIMIT_SW);
 	///SET PK1 AS OUTPUT TO SEND SIGNAL TO SLAVE TO BRAKE MOTOR 
 	DDRK |= (1<<PK0);
+	DDRK |= (1<<PK1);
+	DDRK |= (1<<PK2);
 	PORTK &= ~(1<<PK0); 
 	/// INITIALIZE ALL THE UART
 	uart0_init(UART_BAUD_SELECT(9600,F_CPU));
 	uart2_init(UART_BAUD_SELECT(38400,F_CPU));
 	uart3_init(UART_BAUD_SELECT(38400,F_CPU));
 	//INITIALIZE EVERYTHING ELSE
+
 	initializeAll();
 	
 	char rcvdata = 't';
 	sei();
-
+// 	task1 = task2 = task3 = task4 = task5 = task6 = task7 = task8 = true;
+// 	ShuttleCockGiven = true;
+// 	ShuttleCockArmGone = true;
+// 	where = inTZ3;
+	
+	encoderY.resetCount();
+	
     while (1) 
-    {	
- 		gorockthegamefield();
-  		calculatevel();
+    {			
+   		gorockthegamefield();
+    	calculatevel();
 	}
 }
 

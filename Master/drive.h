@@ -14,13 +14,13 @@
 
 
 #define STARTZONEtoCORNER	200
-#define CORNERtoLZ1			40
+#define CORNERtoLZ1			60
 #define LZ1toTZ1			100
 #define	TZ1toLZ1			100
 #define LZ1toLZ2			100
 #define LZ2toTZ2			100
 #define	TZ2toLZ2			100
-#define LZ2toTZ3			150
+#define LZ2toTZ3			170
 
 #include "uart.h"
 #include "headers.h"
@@ -168,7 +168,7 @@ void Calculate_Motor_Differential_Velocity_With_Center_Pivot(int d_speed);
 void Calculate_Motor_Differential_Velocity_With_Wheel_Pivot(int d_speed);
 void Move_Xaxis(int distance_setpoint, int direction, unsigned int speed);
 void Move_Yaxis(int distance_setpoint, int direction, unsigned int speed);
-void MovY_Slow(int distance_setpoint, int direction, unsigned int speed);
+void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed);
 void Hold_Position(void);
 /////////////////////////////////////
 
@@ -301,8 +301,7 @@ bool Goto_Fence_And_Detect(void)
 
 void calculateCompassPID(void)
 {
-	compass.setPid(6.6,0.02,10);
-	
+	inverseKinematicsTrue = true;
 	if(PidUpdateFlagCompass && compassPID)
 	{
 		
@@ -381,7 +380,7 @@ void calculatevel()	//use matrix to find setpoint of individual motor and store 
 
 
 void movx(int distance_setpoint, int direction, unsigned int speed){
-	compass.setPid(6.6,0.02,10);
+	//compass.setPid(2.1,0.04,32);
 	inverseKinematicsTrue = true;
 	distanceX = abs(encoderX.getdistance());
 	driveX.SETPOINT = distance_setpoint;
@@ -457,9 +456,10 @@ void movx(int distance_setpoint, int direction, unsigned int speed){
 
 void movYForwardSlow(unsigned int speed){
 	
-	FrontLinetrackerY_.setPid(1.0,0.02,6.0);
-	BackLinetrackerY_.setPid(1.0,0.02,6.0);
+	FrontLinetrackerY_.setPid(0.6,0.02,10);
+	BackLinetrackerY_.setPid(0.6,0.02,10);
 	
+
 	_axis = Y_Axis;
 	_direction = Front;
 	Calculate_Motor_Differential_Velocity_With_Center_Pivot(speed);
@@ -775,8 +775,8 @@ void Move_Xaxis(int distance_setpoint, int direction, unsigned int speed){
 //
 void Move_Yaxis(int distance_setpoint, int direction ,unsigned int speed)
 {
-	FrontLinetrackerY_.setPid(1.0,0.02,12.0);
-	BackLinetrackerY_.setPid(1.0,0.02,12.0);
+	FrontLinetrackerY_.setPid(1.2,0,16);
+	FrontLinetrackerY_.setPid(1.2,0,16);
 	
 	distanceY = abs(encoderY.getdistance());
 	driveY.SETPOINT = distance_setpoint;
@@ -839,6 +839,24 @@ void Move_Yaxis(int distance_setpoint, int direction ,unsigned int speed)
 	}
 	Calculate_Motor_Differential_Velocity_With_Center_Pivot(driveY.output);
 	//Calculate_Motor_Differential_Velocity_With_Wheel_Pivot(driveY.output);
+}
+
+void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed)
+{
+	FrontLinetrackerY_.setPid(0.6,0.02,10);
+	BackLinetrackerY_.setPid(0.6,0.02,10);
+	
+	_axis = Y_Axis;
+	
+	if(d_direction == Front){
+		_direction = Front;
+	}
+	else if(d_direction == Back){
+		_direction = Back;
+	}
+	
+	Calculate_Motor_Differential_Velocity_With_Center_Pivot(d_speed - 0.02* abs(encoderY.getdistance()));
+	
 }
 
 
@@ -911,46 +929,14 @@ void Calculate_Motor_Differential_Velocity_With_Wheel_Pivot(int d_speed)
 	
 }
 
-void MovY_Slow(int distance_setpoint, int direction, unsigned int speed)
-{
-	distanceY = abs(encoderY.getdistance());
-	
-	_axis = Y_Axis;
-	
-	if(direction == Front){
-		movingyfront = true;
-		movingyback = false;
-		movingxfront = false;
-		movingxback = false;
-		_direction = Front;
-	}
-	else if(direction == Back){
-		movingyback = true;
-		movingyfront = false;
-		movingxfront = false;
-		movingxback  = false;
-		_direction = Back;
-	}
-	
-	if (distanceY > 500)
-	{
-		Calculate_Motor_Differential_Velocity_With_Center_Pivot(20);
-	}
-	else
-	{
-		Calculate_Motor_Differential_Velocity_With_Center_Pivot(speed);
-	}
-}
-
-
 void Hold_Position(void)
 {
 	_axis = Y_Axis;
 	_direction = Back;
 	
 	
- 	FrontLinetrackerY_.setPid(1.8,0.02,6);
- 	BackLinetrackerY_.setPid(1.8,0.02,6);
+ 	FrontLinetrackerY_.setPid(1.8,0,16);
+ 	BackLinetrackerY_.setPid(1.8,0,16);
 	
 	Calculate_Motor_Differential_Velocity_With_Center_Pivot(0);
 }
