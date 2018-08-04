@@ -168,6 +168,7 @@ void Calculate_Motor_Differential_Velocity_With_Center_Pivot(int d_speed);
 void Calculate_Motor_Differential_Velocity_With_Wheel_Pivot(int d_speed);
 void Move_Xaxis(int distance_setpoint, int direction, unsigned int speed);
 void Move_Yaxis(int distance_setpoint, int direction, unsigned int speed);
+void Move_Xaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed);
 void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed);
 void Hold_Position(void);
 /////////////////////////////////////
@@ -196,6 +197,7 @@ void initializeAll()
 		compass.SETPOINT = initialCompassAngle;
 	}
 	checkRobotMotion();
+	uart3_putc('h');
 	
 }
 
@@ -263,9 +265,7 @@ bool Goto_Fence_And_Detect(void)
 	else if (READ(LEFT_LIMIT_SW) && READ(RIGHT_LIMIT_SW))
 	{
 		inverseKinematicsTrue = true;
-		velocity_robot[0] = -40;
-		velocity_robot[1] = 0;
-		velocity_robot[2] = 0;
+		Move_Xaxis_Slow(1000,Back,60);
 		time_of_limit_switches_pressed = 0;
 		first_data_time_of_limit_switches_pressed = true;
 	}
@@ -283,7 +283,7 @@ bool Goto_Fence_And_Detect(void)
 				time_of_limit_switches_pressed = millis();
 				first_data_time_of_limit_switches_pressed = false;
 			}
-			if (millis() - time_of_limit_switches_pressed > 1)
+			if (millis() - time_of_limit_switches_pressed > 200)
 			{
 				return 1;
 			}
@@ -422,10 +422,10 @@ void movx(int distance_setpoint, int direction, unsigned int speed){
 		}
 		else{
 			if(startingAtFront){	//if starting from front, use this function to ramp up
-				velocity_robot[0] = 60 + 0.1*distanceX;
+				velocity_robot[0] = 60 + 0.14*distanceX; //changed from 0.1 to 0.14
 			}
 			else{					//if going from loading zone 1 to loading zone 2 use this to ramp up
-				velocity_robot[0] = 60 + 0.04 * distanceX;
+				velocity_robot[0] = 60 + 0.06 * distanceX;  // changed from 0.04 to 0.06
 			}
 		}
 		if(direction == Front){
@@ -445,7 +445,7 @@ void movx(int distance_setpoint, int direction, unsigned int speed){
 	
 	}
 	if(startingAtFront){			//if starting from start zone then push the fence
-		velocity_robot[1] = -20;
+		velocity_robot[1] = -28;
 		velocity_robot[2] = 0;
 	}
 	else{
@@ -841,6 +841,31 @@ void Move_Yaxis(int distance_setpoint, int direction ,unsigned int speed)
 	//Calculate_Motor_Differential_Velocity_With_Wheel_Pivot(driveY.output);
 }
 
+void Move_Xaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed)
+{
+	inverseKinematicsTrue = true;
+	
+	velocity_robot[0] =  d_speed - 0.05* abs(encoderX.getdistance());
+	
+	if(d_direction == Front){
+		velocity_robot[0] = velocity_robot[0];
+		movingxfront = true;
+		movingxback = false;
+		movingyback = false;
+		movingyfront = false;
+	}
+	else if(d_direction == Back){
+		velocity_robot[0] = -abs(velocity_robot[0]);
+		movingxfront = false;
+		movingxback = true;
+		movingyfront = false;
+		movingyback = false;
+	}
+	
+	velocity_robot[1] = 0;
+	velocity_robot[2] = 0;
+}
+
 void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t d_speed)
 {
 	FrontLinetrackerY_.setPid(0.6,0.02,10);
@@ -855,7 +880,7 @@ void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t 
 		_direction = Back;
 	}
 	
-	Calculate_Motor_Differential_Velocity_With_Center_Pivot(d_speed - 0.02* abs(encoderY.getdistance()));
+	Calculate_Motor_Differential_Velocity_With_Center_Pivot(d_speed - 0.035* abs(encoderY.getdistance()));
 	
 }
 

@@ -230,7 +230,7 @@ void gorockthegamefield(void)
 		//uart0_puts("\r\n");
 	}
 	else if((directlyLZ2 || directlyTZ3 || LZ2ForTZ3 || alwaysTZ2) && !task1){
-		movx((Throwingzone2.x-100),Front,STARTZONEtoCORNER);
+		movx((Throwingzone2.x-150),Front,STARTZONEtoCORNER);
 		robotState = moving;
 		if(abs(encoderX.getdistance()) >= 6600){
 			//uart0_puts("interrupt on\t");
@@ -254,7 +254,6 @@ void gorockthegamefield(void)
 	else if(task1 && task2 && where == inFirstloadingCorner && (robotState == moving) && (normalGame||alwaysTZ1)){
 		where = inLZ1;
 		compass.SETPOINT = getYawGY88();
-		uart3_putc('h');
 		//uart0_puts("in loading zone 1\r\n");
 		//compass.setPid(2.0,0,30);
 		robotState = notmoving;
@@ -266,7 +265,7 @@ void gorockthegamefield(void)
 	}
 	else if(where == inFirstloadingCorner && task2 && (directlyLZ2 || directlyTZ3 || LZ2ForTZ3 || alwaysTZ2) && robotState == moving){
 		linetrackerYjunctionWatchOff();
-		uart3_putc('h');
+		//uart3_putc('h');
 		startingAtFront = false;
 		where = inLZ2;
 		robotState = notmoving;
@@ -300,7 +299,7 @@ void gorockthegamefield(void)
 			if(GoThrowingZone1 && !task3 && where == inLZ1){
 				robotState = moving;
 				compass.setPid(2.0,0,30);
-				Move_Yaxis(Throwingzone1.y+50,Front,LZ1toTZ1);
+				Move_Yaxis(Throwingzone1.y+75,Front,LZ1toTZ1);
 				//movy(Throwingzone1.y,Front,LZ1toTZ1);
 				uart0_puts("going tz1\t");
 				if(abs(encoderY.getdistance()) >= 1600){
@@ -346,7 +345,7 @@ void gorockthegamefield(void)
 			if(backtoLZ1 && task3 && !task4){
 				compass.setPid(2.0,0,30);
 				//uart0_puts("Returning from tz1 \t");
-				Move_Yaxis(Throwingzone1.y+25, Back, LZ1toTZ1);
+				Move_Yaxis(Throwingzone1.y-50, Back, LZ1toTZ1);
 				//movy(Throwingzone1.y, Back,TZ1toLZ1);
 				robotState = moving;
 				if(abs(encoderY.getdistance()) >= 1200){
@@ -466,7 +465,7 @@ void gorockthegamefield(void)
 					//}
 				//}
 				//else{
-					Move_Yaxis(Throwingzone2.y-25, Back, LZ2toTZ2);
+					Move_Yaxis(Throwingzone2.y-50, Back, LZ2toTZ2);
 					//movy(Throwingzone2.y,Back,TZ2toLZ2);
 					robotState = moving;
 			
@@ -550,7 +549,6 @@ void gorockthegamefield(void)
 			if(backtoLZ2 && task8 && !task9){
 				////uart0_puts("back to lz2\t");
 				compass.setPid(2.0,0,30);//2.0
-				
 					//movy(5300,Back,LZ2toTZ3);
 					robotState = moving;
 					if(abs(encoderY.getdistance()) >= 4000){
