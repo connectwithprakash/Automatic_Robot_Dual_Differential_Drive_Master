@@ -20,7 +20,7 @@
 #define LZ1toLZ2			100
 #define LZ2toTZ2			100
 #define	TZ2toLZ2			100
-#define LZ2toTZ3			170
+#define LZ2toTZ3			150
 
 #include "uart.h"
 #include "headers.h"
@@ -178,7 +178,7 @@ void initializeAll()
 {
 	
 	compass.Set_Max_Min_Output(40,0);
-	compass.setPid(5.5,0,500);//2,0,31);//4,0.09,18);	//5.5, 0, 500 , 2.1,0.04,32
+	compass.setPid(4.0,0.02,10);//2,0,31);//4,0.09,18);	//5.5, 0, 500 , 2.1,0.04,32
 	
 	driveX.setPid(0.15,0,0.9);
 	driveY.setPid(0.15,0,1);
@@ -246,18 +246,18 @@ bool Goto_Fence_And_Detect(void)
 	{
 		inverseKinematicsTrue = false;
 		velocity_motor[0] = 30;
-		velocity_motor[1] = 0;
+		velocity_motor[1] = 30;
 		velocity_motor[2] = 0;
-		velocity_motor[3] = -20;
+		velocity_motor[3] = 0;
 		time_of_limit_switches_pressed = 0;
 		first_data_time_of_limit_switches_pressed = true;
 	}
 	else if (READ(LEFT_LIMIT_SW) && !READ(RIGHT_LIMIT_SW))
 	{
 		inverseKinematicsTrue = false;
-		velocity_motor[0] = 20;
+		velocity_motor[0] = 0;
 		velocity_motor[1] = 0;
-		velocity_motor[2] = 0;
+		velocity_motor[2] = -30;
 		velocity_motor[3] = -30;
 		time_of_limit_switches_pressed = 0;
 		first_data_time_of_limit_switches_pressed = true;
@@ -265,7 +265,7 @@ bool Goto_Fence_And_Detect(void)
 	else if (READ(LEFT_LIMIT_SW) && READ(RIGHT_LIMIT_SW))
 	{
 		inverseKinematicsTrue = true;
-		Move_Xaxis_Slow(1000,Back,60);
+		Move_Xaxis_Slow(600,Back,60);
 		time_of_limit_switches_pressed = 0;
 		first_data_time_of_limit_switches_pressed = true;
 	}
@@ -845,7 +845,7 @@ void Move_Xaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t 
 {
 	inverseKinematicsTrue = true;
 	
-	velocity_robot[0] =  d_speed - 0.05* abs(encoderX.getdistance());
+	velocity_robot[0] =  d_speed - 0.067* abs(encoderX.getdistance());
 	
 	if(d_direction == Front){
 		velocity_robot[0] = velocity_robot[0];
@@ -880,7 +880,7 @@ void Move_Yaxis_Slow(uint16_t d_distance_setpoint, uint8_t d_direction, uint8_t 
 		_direction = Back;
 	}
 	
-	Calculate_Motor_Differential_Velocity_With_Center_Pivot(d_speed - 0.035* abs(encoderY.getdistance()));
+	Calculate_Motor_Differential_Velocity_With_Center_Pivot(d_speed - 0.04* abs(encoderY.getdistance()));
 	
 }
 
